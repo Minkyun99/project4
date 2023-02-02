@@ -66,7 +66,15 @@ export default {
       analysis: "",
       url: "",
       url_data: "",
+      language: "",
+      B: "",
     };
+  },
+  created() {
+    this.$socket.on("trans", (data) => {
+      this.analysis = `예상 이름 : ${data}, 
+      확률 : ${(this.B * 100).toFixed(2)}%`;
+    });
   },
 
   methods: {
@@ -127,32 +135,13 @@ export default {
         // Classify the image.
         model.classify(image).then((predictions) => {
           console.log(predictions);
-          this.analysis = `예상 이름 : ${predictions[0].className},
-              확률 : ${(predictions[0].probability * 100).toFixed(2)}%`;
+          this.B = predictions[0].probability;
+          const A = predictions[0].className;
+
+          /*파파고 번역 소켓 서버로 보내기*/
+          this.$socket.emit("trans", A);
         });
       });
-
-      /*base64*/
-      // fetch(this.url)
-      //   .then((res) => res.blob())
-      //   .then((blob) => {
-      //     const reader = new FileReader();
-      //     reader.onload = () => {
-      //       const base64data = reader.result;
-      //       this.url_data = base64data;
-      //       console.log(this.url_data);
-      //     };
-      //     reader.readAsDataURL(blob);
-      //   });
-
-      //   axios({
-      //     url: "/about",
-      //     method: "post", // 전송방식을 post로 지정
-      //     data: { name: this.url },
-      //   }).then((res) => {
-      //     console.log("ok", res);
-      //     alert(res.data.message);
-      //   });
     },
   },
 };
@@ -265,11 +254,15 @@ button {
 .w-btn-green:hover {
   background-color: #77af9c;
   color: #d7fff1;
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
 .w-btn-green2:hover {
   background-color: #519d9e;
   color: #9dc8c8;
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
 .w-btn-red {
@@ -285,9 +278,9 @@ button {
 .w-btn-red:hover {
   background-color: #ff5f2e;
   color: #e1eef6;
+  transform: scale(1.2);
+  cursor: pointer;
 }
 
 /*analysis CSS*/
-.analysis {
-}
 </style>
